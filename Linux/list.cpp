@@ -114,7 +114,13 @@ int list(const char *path, const char *storePath)
 			}
 			else
 			{
-				waitpid(pid,0,0);
+				while(1)
+				{
+					if(waitpid(pid,0,0)>0)
+						break;
+					else
+						cerr << "wait child process error";
+				}
 				p_time=ctime(&currentstat.st_mtime);
 				p_passwd=getpwuid(currentstat.st_uid);
 				p_group=getgrgid(currentstat.st_gid);
