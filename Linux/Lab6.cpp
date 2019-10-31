@@ -57,20 +57,24 @@ void takeFork(int i) {
 	pFork[i]=0;
 	pFork[(i+1)%N]=0;
 	//cout << "philosopher " << i <<" takes forks successfully!\n";
-	pthread_cond_broadcast(&pWait);
 	pthread_mutex_unlock(&pLock);
 }
 
 void putFork(int i) {
+	pthread_mutex_lock(&pLock);
 	pFork[i]=1;
 	pFork[(i+1)%N]=1;
+	printf("Philosopher: %d puts fork,\n",i);
+	pthread_cond_broadcast(&pWait);
+	pthread_mutex_unlock(&pLock);
 }
 void thinking(int i, int nsecs) {
 	sleep(nsecs);    
-	cout << "Philosopher: " << i << " is thinking.\n";
+	printf("Philosopher: %d is thinking.\n",i);
 }
+
 void eating(int i, int nsecs) {
-	cout << "Philosopher: " << i << " is eating.\n";
+	printf("Philosopher: %d is eating.\n",i);
 	sleep(nsecs);
 }
 
@@ -82,7 +86,6 @@ void* philosopher(void * arg) {
 		takeFork(num);
 		eating(num,nsecs);
 		putFork(num);
-		thinking(num,nsecs);
 	}
 	if(currentline==MAXLINE+1)
 		cout << "\n*********Output lines should reach MAXLINE preset by program around here*********\n";
