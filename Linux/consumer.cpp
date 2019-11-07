@@ -41,9 +41,8 @@ int main(int argc, char *argv[])
 	semid=semget(MYKEY, 1, IPC_CREAT);
 	cout << "semid = " << semid << endl;
 	init_sem(semid, 1);
-	bool readall = false;
-	bool repeat = false;
-	while(!readall)
+	bool repeat = false, running = true;
+	while(running)
 	{
 		semaphore_p(semid, 0);
 		for(int i=0; i<5; i++)
@@ -57,6 +56,7 @@ int main(int argc, char *argv[])
 				file.write(file_buffer, TEXT_SIZE);	
 				memset(pshared->text[i], 0, TEXT_SIZE);
 				pshared->written[i] = false;
+				sleep(1);
 				break;
 			}
 			else
@@ -66,18 +66,21 @@ int main(int argc, char *argv[])
 					if(repeat)
 					{
 						semaphore_v(semid, 0);
-						readall = true;
-						break;
+						cout << "There may be no more resources. Do you wanna try waiting awhile? (y for yes, other for no)\n";
+						string cmd;
+						cin >> cmd;
+						if(cmd == "y")
+							break;
+						else
+						{
+							running = false;
+							break;
+						}
 					}
-					if(pshared->noMoreResource)
-					{
-						i = 0;
-						repeat = true;
-						continue;
-					}
-					semaphore_v(semid, 0);
+					repeat = true;
+					i = 0;
 					sleep(1);
-					break;
+					continue;
 				}
 				else
 					continue;

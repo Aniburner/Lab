@@ -37,14 +37,14 @@ int main(int argc, char *argv[])
 	}
 	cout << "Memory attached at " << shm << endl;
 	pshared = (shared_use_st *)shm;
-	pshared->noMoreResource = false;
 	ifstream file;
 	file.open(argv[1]);
 	int semid;
 	semid=semget(MYKEY, 1, IPC_CREAT);
 	cout << "semid = " << semid << endl;
 	init_sem(semid, 1);
-	while(!pshared->noMoreResource)
+	bool noMoreResource = false;
+	while(!noMoreResource)
 	{
 		memset(file_buffer, 0, TEXT_SIZE);
 		file.read(file_buffer, TEXT_SIZE);
@@ -70,12 +70,13 @@ int main(int argc, char *argv[])
 				cout << "You read: " << file_buffer << endl;
 				pshared->written[i] = true;
 				semaphore_v(semid, 0);
+				sleep(1);
 				break;
 			}
 		}
 		if(file.eof())
 		{
-			pshared->noMoreResource = true;
+			noMoreResource = true;
 		}
 	}
 	file.close();
